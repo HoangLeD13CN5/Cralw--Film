@@ -2,6 +2,7 @@ import scrapy
 from crawl.items import CrawlItem, TypeMovie
 from scrapy_splash import SplashRequest
 
+
 class BomTanSpider(scrapy.Spider):
     name = "bomtan"
     allowed_domains = ['bomtan.net']
@@ -61,7 +62,7 @@ class BomTanSpider(scrapy.Spider):
             request = SplashRequest(response.urljoin(url), endpoint="render.html", callback=self.parse_detail)
             request.meta['film'] = film
             yield request
-        request_next_page =  SplashRequest(
+        request_next_page = SplashRequest(
             url=response.url,
             callback=self.parse_list,
             meta={
@@ -70,7 +71,6 @@ class BomTanSpider(scrapy.Spider):
         )
         request_next_page.meta['film'] = film
         yield request_next_page
-
 
     def parse_detail(self, response):
         film = response.meta['film'].copy()
@@ -94,4 +94,3 @@ class BomTanSpider(scrapy.Spider):
         film["views"] = response.xpath('//div[@class="info_film"]/ul/'
                                        'li[contains(span/text(),"Lượt xem")]/text()').get()
         yield film
-
