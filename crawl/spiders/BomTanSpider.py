@@ -6,6 +6,32 @@ class BomTanSpider(scrapy.Spider):
     name = "bomtan"
     allowed_domains = ['bomtan.net']
     start_urls = ['http://bomtan.net/']
+    script = """
+           function main(splash)
+               assert(splash:go(splash.args.url))
+               assert(splash:wait(0.5))
+               local endUrl = splash:evaljs("$('.currentpage').last().next().attr('href');")
+               assert(splash:go("http://bomtan.net/" .. endUrl))
+               return {
+                   html = splash:html(),
+                   url = splash:url(),
+               }
+           end
+           """
+
+    def start_requests(self):
+        for url in self.start_urls:
+            yield SplashRequest(url, endpoint="render.html", callback=self.parse)
+
+    def parse(self, response):
+        one_series_movie_url = response.xpath('//div[@id="menu-content"]/div/ul/'
+                                              'li[contains(h3/a/@title,"Phim lẻ")]/h3')
+        url = one_series_movie_url.xpath('.//a/@href').extract_first('').strip()
+        item = CrawlItem()
+        item['type'] = TypeMovie.oddMovies
+        request = SplashRequest(response.urljoin(url), endpoint="render.html", callback=self.parse_list)
+        request.meta['film'] = item
+        yield request
 
     def start_requests_one_series_movie(self, response):
         one_series_movie_url = response.xpath('//div[@id="menu-content"]/div/ul/'
@@ -35,13 +61,23 @@ class BomTanSpider(scrapy.Spider):
             request = SplashRequest(response.urljoin(url), endpoint="render.html", callback=self.parse_detail)
             request.meta['film'] = film
             yield request
+        request_next_page =  SplashRequest(
+            url=response.url,
+            callback=self.parse_list,
+            meta={
+                "splash": {"endpoint": "execute", "args": {"lua_source": self.script}}
+            },
+        )
+        request_next_page.meta['film'] = film
+        yield request_next_page
+
 
     def parse_detail(self, response):
         film = response.meta['film'].copy()
         film['url_root'] = self.start_urls[0]
         film["url"] = response.xpath('//p[@class="w_now"]/a[contains(text(),"xem phim")]/@href').get()
-        film["title"] = response.xpath('//div[@class="info_film"]/h1 ').get()
-        film["title_english"] = response.xpath('//div[@class="info_film"]/h2').get()
+        film["title"] = response.xpath('//div[@class="info_film"]/h1/text()').get()
+        film["title_english"] = response.xpath('//div[@class="info_film"]/h2/text()').get()
         film["thumbnail"] = response.xpath('//span[@class="thumb-info"]/a/img/@src').get()
         film["kind"] = response.xpath('//div[@class="info_film"]/ul/'
                                       'li[contains(span/text(),"Thể loại")]/strong/a/@title').get()
@@ -58,3 +94,4 @@ class BomTanSpider(scrapy.Spider):
         film["views"] = response.xpath('//div[@class="info_film"]/ul/'
                                        'li[contains(span/text(),"Lượt xem")]/text()').get()
         yield film
+
