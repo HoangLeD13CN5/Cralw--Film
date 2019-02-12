@@ -29,3 +29,5 @@ class CrawlItem(scrapy.Item):
     director = scrapy.Field()
     release_year = scrapy.Field()
     views = scrapy.Field()
+    imdb = scrapy.Field()
+    description = scrapy.Field()

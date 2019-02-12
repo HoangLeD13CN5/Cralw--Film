@@ -75,22 +75,30 @@ class BomTanSpider(scrapy.Spider):
     def parse_detail(self, response):
         film = response.meta['film'].copy()
         film['url_root'] = self.start_urls[0]
-        film["url"] = response.xpath('//p[@class="w_now"]/a[contains(text(),"xem phim")]/@href').get()
-        film["title"] = response.xpath('//div[@class="info_film"]/h1/text()').get()
-        film["title_english"] = response.xpath('//div[@class="info_film"]/h2/text()').get()
-        film["thumbnail"] = response.xpath('//span[@class="thumb-info"]/a/img/@src').get()
-        film["kind"] = response.xpath('//div[@class="info_film"]/ul/'
-                                      'li[contains(span/text(),"Thể loại")]/strong/a/@title').get()
+        film["url"] = response.xpath('//p[@class="w_now"]/a[contains(text(),"xem phim")]/@href').get().strip()
+        film["title"] = response.xpath('//div[@class="info_film"]/h1/text()').get().strip()
+        film["title_english"] = response.xpath('//div[@class="info_film"]/h2/text()').get().strip()
+        film["thumbnail"] = response.xpath('//span[@class="thumb-info"]/a/img/@src').get().strip()
+
+        kind = ""
+        for element in response.xpath('//div[@class="info_film"]/ul/'
+                                      'li[contains(span/text(),"Thể loại")]/strong/a/@title'):
+            kind += str(element.get()) + ","
+        film["kind"] = kind[:-1]
+
         film["duration"] = response.xpath('//div[@class="info_film"]/ul/'
-                                          'li[contains(span/text(),"Thời lượng")]/text()').get()
+                                          'li[contains(span/text(),"Thời lượng")]/text()').get().strip()
         film["status"] = response.xpath('//div[@class="info_film"]/ul/'
-                                        'li[contains(span/text(),"Trạng thái")]/span/strong/text()').get()
+                                        'li[contains(span/text(),"Trạng thái")]/span/strong/text()').get().strip()
         film["actors"] = response.xpath('//div[@class="info_film"]/ul/'
-                                        'li[contains(span/text(),"Diễn viên")]/text()').get()
+                                        'li[contains(span/text(),"Diễn viên")]/text()').get().strip()
         film["director"] = response.xpath('//div[@class="info_film"]/ul/'
-                                          'li[contains(span/text(),"Đạo diễn")]/text()').get()
+                                          'li[contains(span/text(),"Đạo diễn")]/text()').get().strip()
         film["release_year"] = response.xpath('//div[@class="info_film"]/ul/'
-                                              'li[contains(span/text(),"Năm phát hành")]/text()').get()
+                                              'li[contains(span/text(),"Năm phát hành")]/text()').get().strip()
         film["views"] = response.xpath('//div[@class="info_film"]/ul/'
-                                       'li[contains(span/text(),"Lượt xem")]/text()').get()
+                                       'li[contains(span/text(),"Lượt xem")]/text()').get().strip()
+        film["imdb"] = response.xpath('//div[@class="info_film"]/ul/'
+                                      'li[contains(span/text(),"Điểm IMDb")]/text()').get().strip()
+        film["description"] = response.xpath('//div[@id="info-film"]/p/text()').get().strip()
         yield film

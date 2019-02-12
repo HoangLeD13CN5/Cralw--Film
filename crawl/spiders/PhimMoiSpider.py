@@ -31,19 +31,17 @@ class BomTanSpider(scrapy.Spider):
             request.meta['film'] = film
             yield request
         next_page_url = response.xpath('//ul/li/a[contains(.,"Trang kế")]/@href').get()
-        print("Next Page: " + str(next_page_url))
-        request_next_page = SplashRequest(response.urljoin(str(next_page_url)),
+        if next_page_url:
+            request_next_page = SplashRequest(response.urljoin(str(next_page_url)),
                                           endpoint="render.html", callback=self.parse_list)
-        request_next_page.meta['film'] = film
-        yield request_next_page
+            request_next_page.meta['film'] = film
+            yield request_next_page
 
     def parse_detail(self, response):
         film = response.meta['film'].copy()
         film['url_root'] = self.start_urls[0]
         film["url"] = response.xpath('//div[@class="movie-l-img"]/ul/li/a[contains(.,"Xem phim")]/@href').get()
-
         film["title"] = response.xpath('//div[@class="movie-info"]//h1/span/a/text()').get()
-
         film["title_english"] = response.xpath('//div[@class="movie-info"]//h1/span[@class="title-2"]/text()').get()
         film["thumbnail"] = response.xpath('//div[@class="movie-info"]//div[@class="movie-l-img"]/img/@src').get()
         film["kind"] = response.xpath('//div[@class="movie-info"]//div//a[@class="category"]/text()').get()
