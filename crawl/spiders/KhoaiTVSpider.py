@@ -8,6 +8,7 @@ class KhoaiTVSpider(scrapy.Spider):
     name = "khoaitv"
     allowed_domains = ['khoai.tv']
     start_urls = ['https://khoai.tv/']
+    is_cralw_all = False
 
     def start_requests(self):
         for url in self.start_urls:
@@ -21,6 +22,13 @@ class KhoaiTVSpider(scrapy.Spider):
         request.meta['film'] = item
         yield request
 
+        url_suite = response.xpath('//li[@class="dropdown"]/a[contains(.,"Phim Bộ")]/@href').get()
+        item_suite = CrawlItem()
+        item_suite['type'] = TypeMovie.suiteMovies
+        request_suite = SplashRequest(url_suite, endpoint="render.html", callback=self.parse_list)
+        request_suite.meta['film'] = item_suite
+        yield request_suite
+
     def parse_list(self, response):
         film = response.meta['film'].copy()
         for element in response.xpath('//div[@class="group-film group-film-category"]/div'):
@@ -31,12 +39,13 @@ class KhoaiTVSpider(scrapy.Spider):
             request = SplashRequest(url, endpoint="render.html", callback=self.parse_detail)
             request.meta['film'] = film
             yield request
-        next_page_url = response.xpath('//li[@class="pag-next"]/a/@href').get()
-        if next_page_url:
-            request_next_page = SplashRequest(next_page_url,
-                                              endpoint="render.html", callback=self.parse_list)
-            request_next_page.meta['film'] = film
-            yield request_next_page
+        if self.is_cralw_all:
+            next_page_url = response.xpath('//li[@class="pag-next"]/a/@href').get()
+            if next_page_url:
+                request_next_page = SplashRequest(next_page_url,
+                                                  endpoint="render.html", callback=self.parse_list)
+                request_next_page.meta['film'] = film
+                yield request_next_page
 
     def parse_detail(self, response):
         film = response.meta['film'].copy()
