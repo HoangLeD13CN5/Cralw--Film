@@ -31,3 +31,4 @@ class CrawlItem(scrapy.Item):
     views = scrapy.Field()
     imdb = scrapy.Field()
     description = scrapy.Field()
+    nameWeb = scrapy.Field()

@@ -6,6 +6,7 @@ from scrapy_splash import SplashRequest
 
 class VTV16Spider(scrapy.Spider):
     name = "vtv16"
+    name_web = "vtv16.com"
     allowed_domains = ['vtv16.com']
     start_urls = ['http://www.vtv16.com/']
     is_cralw_all = False
@@ -47,6 +48,7 @@ class VTV16Spider(scrapy.Spider):
 
     def parse_detail(self, response):
         film = response.meta['film'].copy()
+        film['nameWeb'] = self.name_web
         film['url_root'] = self.start_urls[0]
         film["url"] = response.urljoin(response.xpath('//a[@id="btn-film-watch"]/@href')
                                        .extract_first(response.url).strip())

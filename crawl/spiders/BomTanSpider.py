@@ -5,6 +5,7 @@ from scrapy_splash import SplashRequest
 
 class BomTanSpider(scrapy.Spider):
     name = "bomtan"
+    name_web = "bomtan.net"
     allowed_domains = ['bomtan.net']
     start_urls = ['http://bomtan.net/']
     is_cralw_all = False
@@ -64,6 +65,7 @@ class BomTanSpider(scrapy.Spider):
     def parse_detail(self, response):
         film = response.meta['film'].copy()
         film['url_root'] = self.start_urls[0]
+        film['nameWeb'] = self.name_web
         film["url"] = response.xpath('//p[@class="w_now"]/a[contains(text(),"xem phim")]/@href').get()
         film["title"] = response.xpath('//div[@class="info_film"]/h1/text()').get()
         film["title_english"] = response.xpath('//div[@class="info_film"]/h2/text()').get()

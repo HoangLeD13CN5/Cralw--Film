@@ -6,6 +6,7 @@ from scrapy_splash import SplashRequest
 
 class KhoaiTVSpider(scrapy.Spider):
     name = "khoaitv"
+    name_web = "khoai.tv"
     allowed_domains = ['khoai.tv']
     start_urls = ['https://khoai.tv/']
     is_cralw_all = False
@@ -49,6 +50,7 @@ class KhoaiTVSpider(scrapy.Spider):
 
     def parse_detail(self, response):
         film = response.meta['film'].copy()
+        film['nameWeb'] = self.name_web
         film['url_root'] = self.start_urls[0]
         film["url"] = response.xpath('//a[@class="play-film"]/@href').get().strip()
         film["title"] = response.xpath('//h1[@class="title-film-detail-1"]/text()').get().strip()
