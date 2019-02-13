@@ -34,7 +34,7 @@ class FilmDB(DeclarativeBase):
     release_year = Column('release_year', Text())
     des_Film = Column('des_Film', Text())
     IMDb = Column('IMDb', Text())
-    webs = relationship("WebDB")
+    # webs = relationship("WebDB")
 
 
 class WebDB(DeclarativeBase):

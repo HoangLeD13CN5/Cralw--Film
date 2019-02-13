@@ -37,28 +37,21 @@ class CrawlPipeline(object):
         film.title = item["title"]
         film.title_english = item["title_english"]
         id_film = -1
-        try:
-            if item["title_english"]:
-                search = item["title_english"]
-                film = session.query(FilmDB).filter(FilmDB.title_english == search).first()
-                if film:
-                    id_film = film.id
-                if id_film == -1:
-                    session.add(film)
-                    session.commit()
-            else:
-                search = item["title"]
-                film = session.query(FilmDB).filter(FilmDB.title == search).first()
-                id_film = -1
-                if film:
-                    id_film = film.id
-                if id_film == -1:
-                    session.add(film)
-                    session.commit()
-        except:
-            session.rollback()
-            raise
-        finally:
-            session.close()
+        if item["title_english"]:
+            search = item["title_english"]
+            film = session.query(FilmDB).filter(FilmDB.title_english == search).first()
+            if film:
+                id_film = film.id
+        else:
+            search = item["title"]
+            film = session.query(FilmDB).filter(FilmDB.title == search).first()
+            id_film = -1
+            if film:
+                id_film = film.id
+        print("Phim ID: " + str(id_film))
+        if id_film != -1:
+            return item
+        session.add(film)
+        session.close()
         return item
 
