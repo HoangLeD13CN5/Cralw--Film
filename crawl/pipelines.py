@@ -7,7 +7,6 @@
 from sqlalchemy.orm import sessionmaker
 from crawl.models import FilmDB, WebDB, db_connect, create_table
 
-
 class CrawlPipeline(object):
 
     def __init__(self):
@@ -35,23 +34,36 @@ class CrawlPipeline(object):
         film.release_year = item["release_year"]
         film.thumbnail = item["thumbnail"]
         film.title = item["title"]
+        film.type_film = item["type"]
         film.title_english = item["title_english"]
-        id_film = -1
-        if item["title_english"]:
-            search = item["title_english"]
-            film = session.query(FilmDB).filter(FilmDB.title_english == search).first()
-            if film:
-                id_film = film.id
-        else:
-            search = item["title"]
-            film = session.query(FilmDB).filter(FilmDB.title == search).first()
-            id_film = -1
-            if film:
-                id_film = film.id
-        print("Phim ID: " + str(id_film))
-        if id_film != -1:
-            return item
-        session.add(film)
-        session.close()
+        web = WebDB()
+        web.nameWeb = item["nameWeb"]
+        web.status_Film = item["status"]
+        web.urlFilm = item["url"]
+        web.urlWeb = item["url_root"]
+        web.views = item["views"]
+        film.webs.append(web)
+        result = session.query(FilmDB).filter(FilmDB.title == item["title"]).first()
+        try:
+            if result:
+                result.director = item["director"]
+                result.kind = item["kind"]
+                result.actors = item["actors"]
+                result.des_Film = item["description"]
+                result.duration = item["duration"]
+                result.IMDb = item["imdb"]
+                result.release_year = item["release_year"]
+                result.thumbnail = item["thumbnail"]
+                result.title = item["title"]
+                result.title_english = item["title_english"]
+                result.webs.append(web)
+            else:
+                session.add(film)
+            session.add(web)
+            session.commit()
+        except:
+            print("An exception occurred")
+        finally:
+            session.close()
         return item
 

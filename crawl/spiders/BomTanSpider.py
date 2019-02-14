@@ -31,7 +31,7 @@ class BomTanSpider(scrapy.Spider):
                                               'li[contains(h3/a/@title,"Phim lẻ")]/h3')
         url = one_series_movie_url.xpath('.//a/@href').extract_first('').strip()
         item = CrawlItem()
-        item['type'] = TypeMovie.oddMovies
+        item['type'] = TypeMovie.oddMovies.value
         request = SplashRequest(response.urljoin(url), endpoint="render.html", callback=self.parse_list)
         request.meta['film'] = item
         yield request
@@ -39,7 +39,7 @@ class BomTanSpider(scrapy.Spider):
         many_series_movie = response.xpath('//div[@id="menu-content"]/div/ul/li[contains(h3/a/@title,"Phim bộ")]/h3')
         many_series_movie_url = many_series_movie.xpath('.//a/@href').extract_first('').strip()
         item_suite = CrawlItem()
-        item_suite['type'] = TypeMovie.suiteMovies
+        item_suite['type'] = TypeMovie.suiteMovies.value
         request_suite = SplashRequest(response.urljoin(many_series_movie_url), endpoint="render.html", callback=self.parse_list)
         request_suite.meta['film'] = item_suite
         yield request_suite

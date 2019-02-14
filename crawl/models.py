@@ -1,7 +1,7 @@
-from sqlalchemy import create_engine, Column, Table, ForeignKey
+from sqlalchemy import create_engine, Column, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import (
-    Integer, SmallInteger, String, Date, DateTime, Float, Boolean, Text, LargeBinary)
+    Integer, String, Text)
 
 from scrapy.utils.project import get_project_settings
 from sqlalchemy.orm import relationship
@@ -22,27 +22,29 @@ def create_table(engine):
 
 
 class FilmDB(DeclarativeBase):
-    __tablename__ = "table_film"
-    id = Column(Integer, primary_key=True)
-    title = Column('title', Text())
-    title_english = Column('title_english', Text())
-    thumbnail = Column('thumbnail', Text())
+    __tablename__ = "FilmDB"
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    title = Column('title', String(255), unique=True)
+    title_english = Column('title_english', String(255), unique=True, nullable=True)
+    thumbnail = Column('thumbnail', String(255))
     kind = Column('kind', Text())
+    type_film = Column('type_film', Integer)
     duration = Column('duration', Text())
     actors = Column('actors', Text())
     director = Column('director', Text())
     release_year = Column('release_year', Text())
     des_Film = Column('des_Film', Text())
     IMDb = Column('IMDb', Text())
-    # webs = relationship("WebDB")
+    webs = relationship('WebDB', back_populates="film")
 
 
 class WebDB(DeclarativeBase):
-    __tablename__ = "table_web"
-    id = Column(Integer, primary_key=True)
-    urlWeb = Column('urlWeb', Text())
-    nameWeb = Column('nameWeb', Text())
+    __tablename__ = "WebDB"
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    urlWeb = Column('urlWeb', String(255))
+    nameWeb = Column('nameWeb', String(255))
     status_Film = Column('status_Film', Text())
     views = Column('views', Text())
-    urlFilm = Column('urlFilm', Text())
-    id_Film = Column('id_Film', Integer, ForeignKey("table_film.id"), nullable=False)
+    urlFilm = Column('urlFilm', String(255), unique=True)
+    id_Film = Column(Integer, ForeignKey(FilmDB.id))
+    film = relationship('FilmDB', back_populates="webs")

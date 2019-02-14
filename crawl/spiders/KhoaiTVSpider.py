@@ -18,14 +18,14 @@ class KhoaiTVSpider(scrapy.Spider):
     def parse(self, response):
         url = response.xpath('//li[@class="dropdown"]/a[contains(.,"Phim Lẻ")]/@href').get()
         item = CrawlItem()
-        item['type'] = TypeMovie.oddMovies
+        item['type'] = TypeMovie.oddMovies.value
         request = SplashRequest(url, endpoint="render.html", callback=self.parse_list)
         request.meta['film'] = item
         yield request
 
         url_suite = response.xpath('//li[@class="dropdown"]/a[contains(.,"Phim Bộ")]/@href').get()
         item_suite = CrawlItem()
-        item_suite['type'] = TypeMovie.suiteMovies
+        item_suite['type'] = TypeMovie.suiteMovies.value
         request_suite = SplashRequest(url_suite, endpoint="render.html", callback=self.parse_list)
         request_suite.meta['film'] = item_suite
         yield request_suite
